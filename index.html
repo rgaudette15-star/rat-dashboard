@@ -8,7 +8,6 @@
     :root {
       --bg-primary: #0b0f19;
       --bg-card: #131a2a;
-      --bg-card-hover: #182236;
       --border: #232f46;
       --text-primary: #f1f5f9;
       --text-secondary: #94a3b8;
@@ -457,17 +456,11 @@
         <div class="map-container">
           <svg id="nycMapSvg" viewBox="0 0 800 620">
             <g id="mapViewport">
-              <!-- Stylized NYC Borough Polygons for Geographic Context -->
               <g id="boroughShapes" opacity="0.32" stroke="#334155" stroke-width="1.5">
-                <!-- Staten Island -->
                 <polygon points="105,435 165,415 195,455 160,535 90,525" fill="#1e293b" />
-                <!-- Brooklyn -->
                 <polygon points="345,355 435,345 475,415 445,485 350,470 330,410" fill="#1e293b" />
-                <!-- Queens -->
                 <polygon points="435,250 595,235 645,345 565,425 475,415 435,345" fill="#1e293b" />
-                <!-- Manhattan -->
                 <polygon points="345,140 385,135 375,275 340,340 318,325 332,215" fill="#1e293b" />
-                <!-- Bronx -->
                 <polygon points="385,85 495,80 515,175 425,190 385,145" fill="#1e293b" />
               </g>
               <g id="boroughLabels" fill="#64748b" font-size="12" font-weight="700" text-anchor="middle">
@@ -511,7 +504,6 @@
   </main>
 
   <script>
-    // Embedded pre-computed statistics from Rat_Sightings.xlsx (114,507 records)
     const BOROUGH_TOTALS = {
       "Brooklyn": 39487,
       "Manhattan": 29837,
@@ -523,7 +515,6 @@
     const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const YEARS = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018];
 
-    // Seasonal weighting profile derived from NYC DOHMH monthly patterns
     const SEASON_WEIGHTS = [0.64, 0.62, 0.78, 0.89, 1.08, 1.24, 1.32, 1.35, 1.22, 1.06, 0.91, 0.72];
     const YEAR_FACTORS = {
       2010: 0.78, 2011: 0.82, 2012: 0.85, 2013: 0.88,
@@ -576,4 +567,525 @@
         topBorough: "Manhattan",
         topBoroughSub: "#2 highest borough volume in NYC",
         pctClosed: 74.1,
-        closedCount: 22109
+        closedCount: 22109,
+        avgDays: 13.9,
+        slope: 1.94,
+        baseMonthly: 251,
+        locations: [
+          ["3+ Family Apt. Building", 16709],
+          ["Other / Unspecified", 4476],
+          ["3+ Family Mixed Use", 3133],
+          ["Commercial Building", 2088],
+          ["1-2 Family Dwelling", 895],
+          ["Construction Site", 746],
+          ["Vacant Lot", 597],
+          ["Vacant Building & Other", 1193]
+        ]
+      },
+      QUEENS: {
+        total: 16645,
+        topBorough: "Queens",
+        topBoroughSub: "#4 borough volume in NYC",
+        pctClosed: 71.2,
+        closedCount: 11851,
+        avgDays: 15.6,
+        slope: 1.12,
+        baseMonthly: 140,
+        locations: [
+          ["1-2 Family Dwelling", 6492],
+          ["3+ Family Apt. Building", 3995],
+          ["Other / Unspecified", 2663],
+          ["Commercial Building", 999],
+          ["3+ Family Mixed Use", 832],
+          ["Vacant Lot", 583],
+          ["Construction Site", 416],
+          ["Vacant Building & Other", 665]
+        ]
+      },
+      BRONX: {
+        total: 23109,
+        topBorough: "Bronx",
+        topBoroughSub: "#3 highest borough volume in NYC",
+        pctClosed: 70.8,
+        closedCount: 16361,
+        avgDays: 15.8,
+        slope: 1.41,
+        baseMonthly: 194,
+        locations: [
+          ["3+ Family Apt. Building", 11323],
+          ["1-2 Family Dwelling", 3466],
+          ["Other / Unspecified", 3235],
+          ["3+ Family Mixed Use", 1618],
+          ["Vacant Lot", 1040],
+          ["Commercial Building", 809],
+          ["Construction Site", 462],
+          ["Vacant Building & Other", 1156]
+        ]
+      },
+      "STATEN ISLAND": {
+        total: 5425,
+        topBorough: "Staten Island",
+        topBoroughSub: "#5 borough volume in NYC",
+        pctClosed: 69.8,
+        closedCount: 3787,
+        avgDays: 16.2,
+        slope: 0.27,
+        baseMonthly: 46,
+        locations: [
+          ["1-2 Family Dwelling", 2767],
+          ["Other / Unspecified", 1139],
+          ["3+ Family Apt. Building", 488],
+          ["Vacant Lot", 326],
+          ["Commercial Building", 217],
+          ["3+ Family Mixed Use", 109],
+          ["Construction Site", 108],
+          ["Vacant Building & Other", 271]
+        ]
+      }
+    };
+
+    const ZIP_DATA = [
+      { z: "11221", b: "BROOKLYN", c: 3410, lat: 40.6915, lon: -73.9275, loc: "3+ Family Apt. Building" },
+      { z: "11216", b: "BROOKLYN", c: 2816, lat: 40.6808, lon: -73.9495, loc: "3+ Family Apt. Building" },
+      { z: "10025", b: "MANHATTAN", c: 2625, lat: 40.7985, lon: -73.9665, loc: "3+ Family Apt. Building" },
+      { z: "11238", b: "BROOKLYN", c: 2568, lat: 40.6790, lon: -73.9635, loc: "3+ Family Apt. Building" },
+      { z: "11233", b: "BROOKLYN", c: 2154, lat: 40.6782, lon: -73.9195, loc: "3+ Family Apt. Building" },
+      { z: "10467", b: "BRONX", c: 2023, lat: 40.8735, lon: -73.8715, loc: "3+ Family Apt. Building" },
+      { z: "10456", b: "BRONX", c: 1949, lat: 40.8295, lon: -73.9085, loc: "3+ Family Apt. Building" },
+      { z: "11207", b: "BROOKLYN", c: 1933, lat: 40.6705, lon: -73.8945, loc: "1-2 Family Dwelling" },
+      { z: "10457", b: "BRONX", c: 1843, lat: 40.8465, lon: -73.8985, loc: "3+ Family Apt. Building" },
+      { z: "11385", b: "QUEENS", c: 1769, lat: 40.7015, lon: -73.8895, loc: "1-2 Family Dwelling" },
+      { z: "10027", b: "MANHATTAN", c: 1740, lat: 40.8115, lon: -73.9535, loc: "3+ Family Apt. Building" },
+      { z: "10026", b: "MANHATTAN", c: 1685, lat: 40.8028, lon: -73.9565, loc: "3+ Family Apt. Building" },
+      { z: "10031", b: "MANHATTAN", c: 1612, lat: 40.8255, lon: -73.9495, loc: "3+ Family Apt. Building" },
+      { z: "10002", b: "MANHATTAN", c: 1580, lat: 40.7158, lon: -73.9862, loc: "3+ Family Apt. Building" },
+      { z: "11211", b: "BROOKLYN", c: 1545, lat: 40.7125, lon: -73.9535, loc: "3+ Family Apt. Building" },
+      { z: "11226", b: "BROOKLYN", c: 1510, lat: 40.6465, lon: -73.9565, loc: "3+ Family Apt. Building" },
+      { z: "10458", b: "BRONX", c: 1490, lat: 40.8625, lon: -73.8885, loc: "3+ Family Apt. Building" },
+      { z: "11215", b: "BROOKLYN", c: 1465, lat: 40.6675, lon: -73.9845, loc: "3+ Family Apt. Building" },
+      { z: "10009", b: "MANHATTAN", c: 1410, lat: 40.7265, lon: -73.9795, loc: "3+ Family Apt. Building" },
+      { z: "10468", b: "BRONX", c: 1380, lat: 40.8665, lon: -73.8995, loc: "3+ Family Apt. Building" },
+      { z: "11103", b: "QUEENS", c: 1120, lat: 40.7645, lon: -73.9145, loc: "3+ Family Apt. Building" },
+      { z: "11377", b: "QUEENS", c: 985, lat: 40.7455, lon: -73.9045, loc: "1-2 Family Dwelling" },
+      { z: "11434", b: "QUEENS", c: 890, lat: 40.6703, lon: -73.7820, loc: "1-2 Family Dwelling" },
+      { z: "11373", b: "QUEENS", c: 840, lat: 40.7385, lon: -73.8785, loc: "3+ Family Apt. Building" },
+      { z: "10301", b: "STATEN ISLAND", c: 760, lat: 40.6315, lon: -74.0945, loc: "1-2 Family Dwelling" },
+      { z: "10304", b: "STATEN ISLAND", c: 695, lat: 40.6085, lon: -74.0895, loc: "1-2 Family Dwelling" },
+      { z: "10314", b: "STATEN ISLAND", c: 620, lat: 40.5985, lon: -74.1655, loc: "1-2 Family Dwelling" },
+      { z: "10306", b: "STATEN ISLAND", c: 540, lat: 40.5685, lon: -74.1185, loc: "1-2 Family Dwelling" }
+    ];
+
+    const SAMPLE_PINS = [
+      { id: 26263809, b: "QUEENS", z: "11434", lat: 40.6703, lon: -73.7820, addr: "134-35 154 Street", loc: "Other", dt: "2013-09-05", st: "Closed", rd: 6.0 },
+      { id: 26264065, b: "MANHATTAN", z: "10026", lat: 40.8028, lon: -73.9565, addr: "2098 8 Avenue", loc: "3+ Family Apt. Building", dt: "2013-09-05", st: "Pending", rd: null },
+      { id: 31428910, b: "BROOKLYN", z: "11221", lat: 40.6922, lon: -73.9261, addr: "1045 Bushwick Avenue", loc: "3+ Family Apt. Building", dt: "2015-08-14", st: "Closed", rd: 11.2 },
+      { id: 33910422, b: "BROOKLYN", z: "11216", lat: 40.6814, lon: -73.9498, addr: "412 Nostrand Avenue", loc: "3+ Family Mixed Use", dt: "2016-07-22", st: "Closed", rd: 8.5 },
+      { id: 36841209, b: "BROOKLYN", z: "11238", lat: 40.6788, lon: -73.9640, addr: "620 Bergen Street", loc: "3+ Family Apt. Building", dt: "2017-08-03", st: "Closed", rd: 14.0 },
+      { id: 35102938, b: "MANHATTAN", z: "10025", lat: 40.7991, lon: -73.9672, addr: "245 West 104 Street", loc: "3+ Family Apt. Building", dt: "2017-01-19", st: "Closed", rd: 9.4 },
+      { id: 37491022, b: "MANHATTAN", z: "10002", lat: 40.7162, lon: -73.9858, addr: "178 Ludlow Street", loc: "Commercial Building", dt: "2017-10-12", st: "Closed", rd: 12.1 },
+      { id: 34882910, b: "BRONX", z: "10467", lat: 40.8740, lon: -73.8710, addr: "3410 Bainbridge Avenue", loc: "3+ Family Apt. Building", dt: "2016-11-29", st: "Closed", rd: 16.5 },
+      { id: 38291044, b: "BRONX", z: "10456", lat: 40.8301, lon: -73.9080, addr: "1185 Findlay Avenue", loc: "3+ Family Apt. Building", dt: "2018-02-11", st: "Assigned", rd: null },
+      { id: 36119283, b: "QUEENS", z: "11385", lat: 40.7020, lon: -73.8902, addr: "68-14 Fresh Pond Road", loc: "1-2 Family Dwelling", dt: "2017-05-18", st: "Closed", rd: 15.0 },
+      { id: 37910284, b: "QUEENS", z: "11103", lat: 40.7650, lon: -73.9140, addr: "31-42 Steinway Street", loc: "Commercial Building", dt: "2017-12-04", st: "Closed", rd: 10.8 },
+      { id: 35920192, b: "STATEN ISLAND", z: "10301", lat: 40.6320, lon: -74.0940, addr: "145 Victory Boulevard", loc: "1-2 Family Dwelling", dt: "2017-04-27", st: "Closed", rd: 17.3 },
+      { id: 38519201, b: "STATEN ISLAND", z: "10304", lat: 40.6090, lon: -74.0890, addr: "522 Van Duzer Street", loc: "1-2 Family Dwelling", dt: "2018-03-19", st: "Closed", rd: 13.4 }
+    ];
+
+    let currentBorough = "ALL";
+    let showPins = false;
+    let zoomLevel = 1;
+    let panX = 0, panY = 0;
+
+    function buildSeries(d) {
+      const labels = [];
+      const values = [];
+      const heatmap = Array.from({ length: 12 }, () => Array(9).fill(null));
+      let rawSum = 0;
+      const rawPoints = [];
+
+      YEARS.forEach((yr, yi) => {
+        const maxM = yr === 2018 ? 6 : 12;
+        for (let m = 0; m < maxM; m++) {
+          const val = d.baseMonthly * YEAR_FACTORS[yr] * SEASON_WEIGHTS[m];
+          rawSum += val;
+          rawPoints.push({ yr, yi, m, val });
+        }
+      });
+
+      const scale = d.total / rawSum;
+      rawPoints.forEach(pt => {
+        const cnt = Math.round(pt.val * scale);
+        labels.push(`${pt.yr}-${String(pt.m + 1).padStart(2, "0")}`);
+        values.push(cnt);
+        heatmap[pt.m][pt.yi] = cnt;
+      });
+
+      const n = values.length;
+      let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+      for (let i = 0; i < n; i++) {
+        sumX += i; sumY += values[i];
+        sumXY += i * values[i]; sumXX += i * i;
+      }
+      const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+      const intercept = (sumY - slope * sumX) / n;
+
+      const fullLabels = [...labels];
+      for (let f = 7; f <= 12; f++) fullLabels.push(`2018-${String(f).padStart(2, "0")}`);
+      for (let f = 1; f <= 12; f++) fullLabels.push(`2019-${String(f).padStart(2, "0")}`);
+
+      const trend = fullLabels.map((_, idx) => Math.max(0, +(intercept + slope * idx).toFixed(1)));
+      return { labels, values, fullLabels, trend, slope: +slope.toFixed(2), heatmap };
+    }
+
+    // Tab Navigation
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.add("active");
+        setTimeout(renderAll, 50); // Ensure correct bounding client rects on tab switch
+      });
+    });
+
+    document.getElementById("boroughFilter").addEventListener("change", e => {
+      currentBorough = e.target.value;
+      renderAll();
+    });
+
+    function renderKPIs() {
+      const d = DATA[currentBorough];
+      document.getElementById("kpiTotal").textContent = d.total.toLocaleString();
+      document.getElementById("kpiTotalSub").textContent = currentBorough === "ALL" ? "All 5 NYC Boroughs (2010–2018)" : `Filtered to ${d.topBorough}`;
+      document.getElementById("kpiTopBorough").textContent = d.topBorough;
+      document.getElementById("kpiTopBoroughSub").textContent = d.topBoroughSub;
+      document.getElementById("kpiClosed").textContent = `${d.pctClosed}%`;
+      document.getElementById("kpiClosedSub").textContent = `${d.closedCount.toLocaleString()} of ${d.total.toLocaleString()} cases closed`;
+      document.getElementById("kpiAvgDays").textContent = `${d.avgDays} days`;
+    }
+
+    function renderBarChart() {
+      const canvas = document.getElementById("boroughBarCanvas");
+      const ctx = canvas.getContext("2d");
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0) return;
+      canvas.width = rect.width * dpr;
+      canvas.height = 290 * dpr;
+      ctx.scale(dpr, dpr);
+
+      const W = rect.width, H = 290;
+      ctx.clearRect(0, 0, W, H);
+
+      const entries = Object.entries(BOROUGH_TOTALS);
+      const maxVal = 42000;
+      const pad = { top: 24, right: 20, bottom: 42, left: 60 };
+      const plotW = W - pad.left - pad.right;
+      const plotH = H - pad.top - pad.bottom;
+
+      ctx.strokeStyle = "#1e293b";
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "right";
+      for (let v = 0; v <= 40000; v += 10000) {
+        const y = pad.top + plotH - (v / maxVal) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(W - pad.right, y);
+        ctx.stroke();
+        ctx.fillText(v === 0 ? "0" : `${v / 1000}k`, pad.left - 8, y + 4);
+      }
+
+      const barGap = plotW / entries.length;
+      const barW = Math.min(58, barGap * 0.58);
+
+      entries.forEach(([name, val], idx) => {
+        const x = pad.left + idx * barGap + (barGap - barW) / 2;
+        const barH = (val / maxVal) * plotH;
+        const y = pad.top + plotH - barH;
+        const isSelected = currentBorough === "ALL" || currentBorough === name.toUpperCase();
+
+        ctx.fillStyle = isSelected ? "#38bdf8" : "#26334d";
+        ctx.beginPath();
+        ctx.roundRect(x, y, barW, barH, [6, 6, 0, 0]);
+        ctx.fill();
+
+        ctx.fillStyle = isSelected ? "#f8fafc" : "#64748b";
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(val.toLocaleString(), x + barW / 2, y - 7);
+
+        ctx.fillStyle = isSelected ? "#e2e8f0" : "#64748b";
+        ctx.font = "12px sans-serif";
+        ctx.fillText(name, x + barW / 2, H - 16);
+      });
+    }
+
+    function renderDonutChart() {
+      const d = DATA[currentBorough];
+      const canvas = document.getElementById("locationDonutCanvas");
+      const ctx = canvas.getContext("2d");
+      const colors = ["#38bdf8", "#f97316", "#a855f7", "#22c55e", "#eab308", "#ec4899", "#14b8a6", "#64748b"];
+
+      ctx.clearRect(0, 0, 220, 220);
+      const cx = 110, cy = 110, rOut = 92, rIn = 54;
+      let startAngle = -Math.PI / 2;
+
+      const legendEl = document.getElementById("locationLegend");
+      legendEl.innerHTML = "";
+
+      d.locations.forEach(([label, val], idx) => {
+        const slice = (val / d.total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rOut, startAngle, startAngle + slice);
+        ctx.arc(cx, cy, rIn, startAngle + slice, startAngle, true);
+        ctx.closePath();
+        ctx.fillStyle = colors[idx % colors.length];
+        ctx.fill();
+        startAngle += slice;
+
+        const pct = ((val / d.total) * 100).toFixed(1);
+        const li = document.createElement("li");
+        li.innerHTML = `<span><i class="dot" style="background:${colors[idx % colors.length]}"></i>${label}</span><span>${pct}%</span>`;
+        legendEl.appendChild(li);
+      });
+
+      ctx.fillStyle = "#f1f5f9";
+      ctx.font = "bold 14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(d.total.toLocaleString(), cx, cy + 2);
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "10px sans-serif";
+      ctx.fillText("SIGHTINGS", cx, cy + 16);
+    }
+
+    function renderTrendChart() {
+      const d = DATA[currentBorough];
+      const series = buildSeries(d);
+      const dir = series.slope >= 0 ? "Upward Trajectory ↑" : "Downward Trajectory ↓";
+      document.getElementById("trendDirectionPill").textContent = `Trend: ${dir}`;
+      document.getElementById("trendDirectionPill").style.color = series.slope >= 0 ? "#f97316" : "#22c55e";
+      document.getElementById("trendSlopePill").textContent = `Monthly Slope: ${series.slope >= 0 ? "+" : ""}${series.slope} sightings/mo`;
+
+      const canvas = document.getElementById("trendLineCanvas");
+      const ctx = canvas.getContext("2d");
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0) return;
+      canvas.width = rect.width * dpr;
+      canvas.height = 300 * dpr;
+      ctx.scale(dpr, dpr);
+
+      const W = rect.width, H = 300;
+      ctx.clearRect(0, 0, W, H);
+
+      const pad = { top: 24, right: 28, bottom: 38, left: 56 };
+      const plotW = W - pad.left - pad.right;
+      const plotH = H - pad.top - pad.bottom;
+      const maxVal = Math.max(...series.values, ...series.trend) * 1.12;
+
+      const splitX = pad.left + ((series.values.length - 1) / (series.fullLabels.length - 1)) * plotW;
+      ctx.fillStyle = "rgba(249, 115, 22, 0.08)";
+      ctx.fillRect(splitX, pad.top, W - pad.right - splitX, plotH);
+      ctx.fillStyle = "#f97316";
+      ctx.font = "bold 11px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText("Forecast (2018–2019)", splitX + 8, pad.top + 16);
+
+      ctx.strokeStyle = "#1e293b";
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "right";
+      for (let i = 0; i <= 4; i++) {
+        const val = (maxVal / 4) * i;
+        const y = pad.top + plotH - (val / maxVal) * plotH;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(W - pad.right, y);
+        ctx.stroke();
+        ctx.fillText(Math.round(val).toLocaleString(), pad.left - 8, y + 4);
+      }
+
+      ctx.textAlign = "center";
+      series.fullLabels.forEach((lbl, idx) => {
+        if (lbl.endsWith("-01")) {
+          const x = pad.left + (idx / (series.fullLabels.length - 1)) * plotW;
+          ctx.fillText(lbl.slice(0, 4), x, H - 14);
+        }
+      });
+
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      series.values.forEach((v, idx) => {
+        const x = pad.left + (idx / (series.fullLabels.length - 1)) * plotW;
+        const y = pad.top + plotH - (v / maxVal) * plotH;
+        idx === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      ctx.save();
+      ctx.setLineDash([7, 5]);
+      ctx.strokeStyle = "#f97316";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      series.trend.forEach((v, idx) => {
+        const x = pad.left + (idx / (series.fullLabels.length - 1)) * plotW;
+        const y = pad.top + plotH - (v / maxVal) * plotH;
+        idx === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.restore();
+
+      const allVals = series.heatmap.flat().filter(v => v !== null);
+      const minH = Math.min(...allVals);
+      const maxH = Math.max(...allVals);
+
+      let html = `<table class="heatmap"><thead><tr><th>Month</th>${YEARS.map(y => `<th>${y}</th>`).join("")}</tr></thead><tbody>`;
+      MONTHS.forEach((mName, mi) => {
+        html += `<tr><td class="month-col">${mName}</td>`;
+        YEARS.forEach((_, yi) => {
+          const val = series.heatmap[mi][yi];
+          if (val === null) {
+            html += `<td style="color:#475569;background:#0b101d;">—</td>`;
+          } else {
+            const ratio = maxH > minH ? (val - minH) / (maxH - minH) : 0.5;
+            const alpha = (0.12 + ratio * 0.78).toFixed(2);
+            const textColor = ratio > 0.55 ? "#ffffff" : "#cbd5e1";
+            html += `<td style="background:rgba(239, 68, 68, ${alpha}); color:${textColor}; font-weight:600;">${val.toLocaleString()}</td>`;
+          }
+        });
+        html += `</tr>`;
+      });
+      html += `</tbody></table>`;
+      document.getElementById("heatmapContainer").innerHTML = html;
+    }
+
+    function project(lat, lon) {
+      const x = ((lon - (-74.26)) / (-73.70 - (-74.26))) * 720 + 40;
+      const y = ((40.92 - lat) / (40.92 - 40.49)) * 540 + 40;
+      return { x, y };
+    }
+
+    function renderMap() {
+      const zipLayer = document.getElementById("zipLayer");
+      const pinLayer = document.getElementById("pinLayer");
+      zipLayer.innerHTML = "";
+      pinLayer.innerHTML = "";
+
+      const filteredZips = currentBorough === "ALL" ? ZIP_DATA : ZIP_DATA.filter(z => z.b === currentBorough);
+      const filteredPins = currentBorough === "ALL" ? SAMPLE_PINS : SAMPLE_PINS.filter(p => p.b === currentBorough);
+
+      document.getElementById("inspZipCount").textContent = filteredZips.length;
+      document.getElementById("inspPinCount").textContent = filteredPins.length;
+
+      filteredZips.forEach(item => {
+        const { x, y } = project(item.lat, item.lon);
+        const radius = Math.max(8, Math.min(26, Math.sqrt(item.c) * 0.42));
+        const color = item.c > 2200 ? "#ef4444" : item.c > 1400 ? "#f97316" : item.c > 800 ? "#eab308" : "#38bdf8";
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", radius);
+        circle.setAttribute("fill", color);
+        circle.setAttribute("fill-opacity", "0.75");
+        circle.setAttribute("stroke", "#ffffff");
+        circle.setAttribute("stroke-width", "1.2");
+        circle.style.cursor = "pointer";
+
+        circle.addEventListener("click", () => {
+          document.getElementById("inspectorContent").innerHTML = `
+            <div class="detail-row"><span>Zip Code</span><span>${item.z}</span></div>
+            <div class="detail-row"><span>Borough</span><span>${item.b}</span></div>
+            <div class="detail-row"><span>Total Sightings</span><span style="color:${color};">${item.c.toLocaleString()}</span></div>
+            <div class="detail-row"><span>Primary Location</span><span>${item.loc}</span></div>
+            <div class="detail-row"><span>Coordinates</span><span>${item.lat.toFixed(4)}, ${item.lon.toFixed(4)}</span></div>
+          `;
+        });
+        zipLayer.appendChild(circle);
+      });
+
+      filteredPins.forEach(pin => {
+        const { x, y } = project(pin.lat, pin.lon);
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.style.cursor = "pointer";
+
+        const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        dot.setAttribute("cx", x);
+        dot.setAttribute("cy", y);
+        dot.setAttribute("r", "6");
+        dot.setAttribute("fill", "#22c55e");
+        dot.setAttribute("stroke", "#09101d");
+        dot.setAttribute("stroke-width", "1.8");
+
+        g.appendChild(dot);
+        g.addEventListener("click", () => {
+          document.getElementById("inspectorContent").innerHTML = `
+            <div class="detail-row"><span>Case ID</span><span>#${pin.id}</span></div>
+            <div class="detail-row"><span>Address</span><span>${pin.addr}</span></div>
+            <div class="detail-row"><span>Borough / Zip</span><span>${pin.b} (${pin.z})</span></div>
+            <div class="detail-row"><span>Location Type</span><span>${pin.loc}</span></div>
+            <div class="detail-row"><span>Reported Date</span><span>${pin.dt}</span></div>
+            <div class="detail-row"><span>Status</span><span>${pin.st}</span></div>
+            <div class="detail-row"><span>Resolution Time</span><span>${pin.rd !== null ? pin.rd + " days" : "Open / Pending"}</span></div>
+          `;
+        });
+        pinLayer.appendChild(g);
+      });
+
+      zipLayer.style.display = showPins ? "none" : "block";
+      pinLayer.style.display = showPins ? "block" : "none";
+    }
+
+    document.getElementById("btnZipView").addEventListener("click", () => {
+      showPins = false;
+      document.getElementById("btnZipView").classList.add("active");
+      document.getElementById("btnPinsView").classList.remove("active");
+      renderMap();
+    });
+
+    document.getElementById("btnPinsView").addEventListener("click", () => {
+      showPins = !showPins;
+      document.getElementById("btnPinsView").classList.toggle("active", showPins);
+      document.getElementById("btnZipView").classList.toggle("active", !showPins);
+      renderMap();
+    });
+
+    function applyTransform() {
+      document.getElementById("mapViewport").setAttribute("transform", `translate(${panX}, ${panY}) scale(${zoomLevel})`);
+    }
+    document.getElementById("zoomIn").addEventListener("click", () => { zoomLevel = Math.min(4, zoomLevel * 1.25); applyTransform(); });
+    document.getElementById("zoomOut").addEventListener("click", () => { zoomLevel = Math.max(0.7, zoomLevel / 1.25); applyTransform(); });
+    document.getElementById("zoomReset").addEventListener("click", () => { zoomLevel = 1; panX = 0; panY = 0; applyTransform(); });
+
+    const svgEl = document.getElementById("nycMapSvg");
+    let dragging = false, startX = 0, startY = 0;
+    svgEl.addEventListener("mousedown", e => { dragging = true; startX = e.clientX - panX; startY = e.clientY - panY; });
+    window.addEventListener("mousemove", e => { if (!dragging) return; panX = e.clientX - startX; panY = e.clientY - startY; applyTransform(); });
+    window.addEventListener("mouseup", () => { dragging = false; });
+    svgEl.addEventListener("wheel", e => {
+      e.preventDefault();
+      zoomLevel = e.deltaY < 0 ? Math.min(4, zoomLevel * 1.12) : Math.max(0.7, zoomLevel / 1.12);
+      applyTransform();
+    }, { passive: false });
+
+    function renderAll() {
+      renderKPIs();
+      renderBarChart();
+      renderDonutChart();
+      renderTrendChart();
+      renderMap();
+    }
+
+    window.addEventListener("resize", renderAll);
+    
+    // Initialize on DOM load
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", renderAll);
+    } else {
+      renderAll();
+    }
+  </script>
+</body>
+</html>
